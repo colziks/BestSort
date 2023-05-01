@@ -1,0 +1,182 @@
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <algorithm>
+#include <string>
+
+using namespace std;
+using namespace std::chrono;
+
+class SortAlgo {
+public:
+    virtual void sort(vector<int>& arr) = 0;
+    virtual string getName() = 0;
+};
+
+class BubbleSort : public SortAlgo {
+public:
+    void sort(vector<int>& arr) override {
+        int n = arr.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    swap(arr[j], arr[j + 1]);
+                }
+            }
+        }
+    }
+    string getName() override {
+        return "BubbleSort";
+    }
+};
+
+class InsertionSort : public SortAlgo {
+public:
+    void sort(vector<int>& arr) override {
+        int n = arr.size();
+        for (int i = 1; i < n; i++) {
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= 0 && arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+    }
+    string getName() override {
+        return "InsertionSort";
+    }
+};
+
+class SelectionSort : public SortAlgo {
+public:
+    void sort(vector<int>& arr) override {
+        int n = arr.size();
+        for (int i = 0; i < n - 1; i++) {
+            int minIdx = i;
+            for (int j = i + 1; j < n; j++) {
+                if (arr[j] < arr[minIdx]) {
+                    minIdx = j;
+                }
+            }
+            swap(arr[i], arr[minIdx]);
+        }
+    }
+    string getName() override {
+        return "SelectionSort";
+    }
+};
+
+class MergeSort : public SortAlgo {
+public:
+    void merge(vector<int>& arr, int l, int m, int r) {
+        int n1 = m - l + 1;
+        int n2 = r - m;
+        vector<int> L(n1);
+        vector<int> R(n2);
+        for (int i = 0; i < n1; i++) {
+            L[i] = arr[l + i];
+        }
+        for (int j = 0; j < n2; j++) {
+            R[j] = arr[m + 1 + j];
+        }
+        int i = 0;
+        int j = 0;
+        int k = l;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                i++;
+            }
+            else {
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+        }
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+    void mergeSort(vector<int>& arr, int l, int r) {
+        if (l < r) {
+            int m = l + (r - l) / 2;
+            mergeSort(arr, l, m);
+            mergeSort(arr, m + 1, m)
+            merge(arr, l, m, r);
+        }
+    }
+    void sort(vector<int>& arr) override {
+        mergeSort(arr, 0, arr.size() - 1);
+    }
+    string getName() override {
+        return "MergeSort";
+    }
+};
+
+class QuickSort : public SortAlgo {
+public:
+    int partition(vector<int>& arr, int low, int high) {
+        int pivot = arr[high];
+        int i = low - 1;
+        for (int j = low; j <= high - 1; j++) {
+            if (arr[j] < pivot) {
+                i++;
+                swap(arr[i], arr[j]);
+            }
+        }
+        swap(arr[i + 1], arr[high]);
+        return i + 1;
+    }
+    void quickSort(vector<int>& arr, int low, int high) {
+        if (low < high) {
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
+        }
+    }
+    void sort(vector<int>& arr) override {
+        quickSort(arr, 0, arr.size() - 1);
+    }
+    string getName() override {
+        return "QuickSort";
+    }
+};
+
+class SortingAlgorithmFinder {
+public:
+    SortAlgo* findOptimalSort(vector<int>& arr) {
+        vector<SortAlgo*> algos = { new BubbleSort(), new InsertionSort(), new SelectionSort(), new MergeSort(), new QuickSort() };
+        SortAlgo* optimalSort = nullptr;
+        double minTime = numeric_limits<double>::max();
+        for (SortAlgo* algo : algos) {
+            vector<int> temp = arr;
+            auto start = high_resolution_clock::now();
+            algo->sort(temp);
+            auto end = high_resolution_clock::now();
+            double duration = duration_cast<nanoseconds>(end - start).count();
+            if (duration < minTime) {
+                minTime = duration;
+                optimalSort = algo;
+            }
+        }
+        return optimalSort;
+    }
+};
+
+int main() {
+    vector<int> arr = { 5, 2, 8, 1, 3 };
+    SortingAlgorithmFinder finder;
+    SortAlgo* optimalSort = finder.findOptimalSort(arr);
+    cout << "The most optimal sorting algorithm for the given array is " << optimalSort->getName() << endl;
+    return 0;
+}
+            
