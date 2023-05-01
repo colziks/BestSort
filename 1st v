@@ -110,7 +110,7 @@ public:
         if (l < r) {
             int m = l + (r - l) / 2;
             mergeSort(arr, l, m);
-            mergeSort(arr, m + 1, m)
+            mergeSort(arr, m + 1, m);
             merge(arr, l, m, r);
         }
     }
@@ -154,22 +154,30 @@ public:
 class SortingAlgorithmFinder {
 public:
     SortAlgo* findOptimalSort(vector<int>& arr) {
-        vector<SortAlgo*> algos = { new BubbleSort(), new InsertionSort(), new SelectionSort(), new MergeSort(), new QuickSort() };
-        SortAlgo* optimalSort = nullptr;
-        double minTime = numeric_limits<double>::max();
-        for (SortAlgo* algo : algos) {
-            vector<int> temp = arr;
-            auto start = high_resolution_clock::now();
-            algo->sort(temp);
-            auto end = high_resolution_clock::now();
-            double duration = duration_cast<nanoseconds>(end - start).count();
-            if (duration < minTime) {
-                minTime = duration;
-                optimalSort = algo;
-            }
+    vector<SortAlgo*> sortAlgos{new BubbleSort(), new InsertionSort(), new SelectionSort(), new MergeSort(), new QuickSort()};
+    double minTime = numeric_limits<double>::max();
+    SortAlgo* minAlgo = nullptr;
+    for (auto algo : sortAlgos) {
+        auto arrCopy = arr;
+        auto start = high_resolution_clock::now();
+        algo->sort(arrCopy);
+        auto end = high_resolution_clock::now();
+        double timeTaken = duration_cast<nanoseconds>(end - start).count();
+        if (timeTaken < minTime) {
+            minTime = timeTaken;
+            minAlgo = algo;
         }
-        return optimalSort;
     }
+    auto arrCopy = arr;
+    auto start = high_resolution_clock::now();
+    minAlgo->sort(arrCopy);
+    auto end = high_resolution_clock::now();
+    double timeTaken = duration_cast<nanoseconds>(end - start).count();
+    cout << "The most optimal sorting algorithm for this array is: " << minAlgo->getName() << endl;
+    cout << "Time taken: " << timeTaken << " ns" << endl;
+    cout << "Memory used: " << sizeof(*minAlgo) << " bytes" << endl;
+    return minAlgo;
+}
 };
 
 int main() {
