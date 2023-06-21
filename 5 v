@@ -203,7 +203,7 @@ int main() {
     end = chrono::high_resolution_clock::now();
     cout << "Heap sort: ";
     printArray(arr, n);
-    printArray(arr, n);
+
     cout << "Time taken: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds" << endl;
 
     return 0;
